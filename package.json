@@ -1,0 +1,29 @@
+{
+  "name": "bot-engine",
+  "version": "2.0.0",
+  "description": "discord bot engine",
+  "main": "./src/run.js",
+  "scripts": {
+    "start": "node .",
+    "test": "nodemon --exec npm start",
+    "test:deploy": "nodemon --exec npm run deploy:run",
+    "commit": "git add * && git commit -m upd",
+    "deploy": "npm run commit && git push %npm_package_config_git% master",
+    "deploy:run": "npm run deploy && npm run start"
+  },
+  "config": {
+    "git": "dokku@fd-c.cf:sofia-ai"
+  },
+  "author": "full_droper <full_droper@pm.me>",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js-selfbot-v13": "^2.10.1",
+    "fd-redis-api": "^1.0.0",
+    "openai": "^3.1.0",
+    "redis": "^4.5.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "nodemon": "^2.0.20"
+  }
+}
