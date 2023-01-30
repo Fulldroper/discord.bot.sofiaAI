@@ -1,3 +1,5 @@
+const axios = require("axios");
+
 // aplication runner
 (async () => {
   // env configuration
@@ -48,11 +50,12 @@
 
     if (prompt?.length <= 0) return;
 
-    msg.channel.sendTyping();
+    const typing = setInterval(() => msg.channel.sendTyping, 12000, msg);
 
     const currTime = new Date().getTime()
 
     if (timeout[msg.author.id] && currTime - timeout[msg.author.id] < TIMEOUT) {
+      clearInterval(typing)
       msg.reply("Я зараз зайнята, поговоримо пізніше")
       return
     } else timeout[msg.author.id] = currTime;
@@ -64,6 +67,7 @@
         size: "1024x1024",
       });
       // response.data.data[0].url
+      clearInterval(typing)
       msg.reply(response.data.data[0].url)
         .catch(() => {
           msg.reply("щось не можу відправити, я спробую тобі в пп")
@@ -73,15 +77,36 @@
           })
         })
     } else {
-      const { data } = await openai.createCompletion({
-        model: "text-davinci-003", prompt,
-        max_tokens: 2048,
-        temperature: 0
-      },{
-        timeout: process.env.TIMEOUT
-      });
-
-      msg.reply(data.choices[0].text.trim())
+      try {
+        const { data } = await openai.createCompletion({
+          model: "text-davinci-003", prompt,
+          max_tokens: 2048,
+          temperature: 0
+        },{
+          timeout: process.env.TIMEOUT
+        });
+  
+        const text = data.choices[0].text.trim()
+  
+        try {
+         const {data} = await axios({
+          url: `https://api-translate.systran.net/translation/text/translate?target=uk&input="${text}"`,
+          method: "post",
+          headers: {
+            "Authorization": `Key ${process.env.TRANSLATE_TOKEN}`
+          }
+         })
+        //  console.log(data.outputs[0].output);
+         clearInterval(typing)
+         msg.reply(data.outputs[0].output.slice(1,-1).replace("Росії",'на болоті').replace("Росія",'болото').replace("росії",'на болоті').replace("росія",'болото'))
+        } catch (error) {
+          clearInterval(typing)
+          msg.reply(text)
+        }
+      } catch (error) {
+        clearInterval(typing)
+        msg.reply("Я щось тріш зморилась. Пізніше поговорим")
+      }
     }
        
   });
