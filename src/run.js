@@ -101,6 +101,7 @@ const axios = require("axios");
          msg.reply(data.outputs[0].output.slice(1,-1).replace("Росії",'на болоті').replace("Росія",'болото').replace("росії",'на болоті').replace("росія",'болото'))
         } catch (error) {
           clearInterval(typing)
+          bot.error(error)
           msg.reply(text)
         }
       } catch (error) {
